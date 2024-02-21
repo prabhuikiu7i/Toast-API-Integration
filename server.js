@@ -2,19 +2,19 @@ const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const { Client } = require('pg');
+// const { Client } = require('pg');
 const app = express();
 const port = 8080;
 
-const client = new Client({
-    host: 'localhost',
-    user: 'postgres',
-    port: 5432,
-    password: 'baseline77',
-    database: 'postgres'
-});
+// const client = new Client({
+//     host: 'localhost',
+//     user: 'postgres',
+//     port: 5432,
+//     password: 'baseline77',
+//     database: 'postgres'
+// });
 
-client.connect();
+// client.connect();
 const merchantId = 'JH1T8ZPBVPS71';
 app.use(cors());
 app.use(bodyParser.json());
