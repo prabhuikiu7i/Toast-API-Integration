@@ -8,43 +8,44 @@ const port = 8080;
 
 const client = new Client({
     host: '3.108.67.115',
-    user: 'centos',
+    user: 'postgres',
     port: 5432,
     password: 'ResPsql987',
     database: 'postgres'
 });
 
-client.connect();
+client.connect().then(() => {
+    console.log('connect successfully');
+    client.query('SELECT * FROM CloverTable')
+        .then((result) => {
+            console.log('Query result:', result.rows);
+        })
+        .catch((error) => {
+            console.error('Error executing query:', error);
+        })
+        .finally(() => {
+            // Close the connection when done
+            client.end();
+        });
+}).catch((err) => {
+    console.log(err);
+});
+
 const merchantId = 'JH1T8ZPBVPS71';
 app.use(cors());
 app.use(bodyParser.json());
 
+
 app.get('/', async (req, res) => {
     try {
-        const headers = {
-            'Authorization': 'Bearer f87fbb20-020a-0326-426d-8b14244ccd34',
-            'accept': 'appli`cation/json'
+        const selectQuery = {
+            text: 'SELECT * FROM CloverTable',
         };
 
-        const response = await axios.get(`https://apisandbox.dev.clover.com/v3/merchants/${merchantId}/items`, {
-            headers: headers
-        });
+        const selectResult = await client.query(selectQuery);
+        console.log('Table Contents:', selectResult.rows);
 
-        console.log("API Response:", response.data);
-        const items = response.data.elements;
-
-        console.log("API Response:", items);
-
-        for (const item of items) {
-            const insertQuery = {
-                text: 'INSERT INTO CloverTable (id, Item_Name, Price, Price_Type, Taxes_And_Fees, Item_Color,type) VALUES ($1, $2, $3, $4, $5, $6,$7) ON CONFLICT (id) DO UPDATE SET Item_Name = $2, Price = $3, Price_Type = $4, Taxes_And_Fees = $5, Item_Color = $6,type = $7',
-                values: [item.id, item.name, item.price, item.priceType, item.defaultTaxRates, item.isRevenue, 'clover'],
-            };
-
-            await client.query(insertQuery);
-        }
-
-        res.json(response.data);
+        res.json({ success: true, data: selectResult.rows });
     } catch (error) {
         console.error("Error fetching items:", error.message);
         res.status(500).json({ error: 'Internal Server Error' });
