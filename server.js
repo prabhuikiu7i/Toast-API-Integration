@@ -14,22 +14,7 @@ const client = new Client({
     database: 'postgres'
 });
 
-client.connect().then(() => {
-    console.log('connect successfully');
-    client.query('SELECT * FROM CloverTable')
-        .then((result) => {
-            console.log('Query result:', result.rows);
-        })
-        .catch((error) => {
-            console.error('Error executing query:', error);
-        })
-        .finally(() => {
-            // Close the connection when done
-            client.end();
-        });
-}).catch((err) => {
-    console.log(err);
-});
+client.connect();
 
 const merchantId = 'JH1T8ZPBVPS71';
 app.use(cors());
