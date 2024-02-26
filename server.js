@@ -6,15 +6,15 @@ const Client = require('pg').Client;
 const app = express();
 const port = 8080;
 
-const client = new Client({
-    host: '3.108.67.115',
-    user: 'postgres',
-    port: 5432,
-    password: 'ResPsql987',
-    database: 'postgres'
-});
+// const client = new Client({
+//     host: '3.108.67.115',
+//     user: 'postgres',
+//     port: 5432,
+//     password: 'ResPsql987',
+//     database: 'postgres'
+// });
 
-client.connect();
+// client.connect();
 
 const merchantId = 'JH1T8ZPBVPS71';
 app.use(cors());
@@ -23,6 +23,7 @@ app.use(bodyParser.json());
 
 app.get('/', async (req, res) => {
     try {
+
         res.json({ success: true});
     } catch (error) {
         console.error("Error fetching items:", error.message);
