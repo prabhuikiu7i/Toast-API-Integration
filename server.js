@@ -4,11 +4,11 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const Client = require('pg').Client;
 const app = express();
-const port = 8081;
+
 
 const client = new Client({
     host: '3.108.67.115',
-    user: 'postgres',
+    user: 'postgres',   
     port: 5432,
     password: 'ResPsql987',
     database: 'postgres'
@@ -85,6 +85,6 @@ app.post('/webhook', async (req, res) => {
 });
 
 
-app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
+app.listen( () => {
+    console.log(`Server is running on http://3.108.67.115`);
 });
