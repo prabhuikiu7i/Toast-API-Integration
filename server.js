@@ -4,7 +4,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const Client = require('pg').Client;
 const app = express();
-const port = 443;
+const port = 8080;
 
 const client = new Client({
     host: '3.108.67.115',
