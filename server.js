@@ -23,14 +23,7 @@ app.use(bodyParser.json());
 
 app.get('/', async (req, res) => {
     try {
-        const selectQuery = {
-            text: 'SELECT * FROM CloverTable',
-        };
-
-        const selectResult = await client.query(selectQuery);
-        console.log('Table Contents:', selectResult.rows);
-
-        res.json({ success: true, data: selectResult.rows });
+        res.json({ success: true});
     } catch (error) {
         console.error("Error fetching items:", error.message);
         res.status(500).json({ error: 'Internal Server Error' });
