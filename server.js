@@ -23,7 +23,8 @@ app.use(bodyParser.json());
 
 app.get('/', async (req, res) => {
     try {
-        console.log("Hello World");
+        const body = req.body;
+        console.log("Hello",body);
         res.json({ success: true});
     } catch (error) {
         console.error("Error fetching items:", error.message);
