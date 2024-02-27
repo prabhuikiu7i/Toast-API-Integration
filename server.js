@@ -20,7 +20,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 
-app.post('/', async (req, res) => {
+app.post('/webhook', async (req, res) => {
     const webhookData = await req.body;
     try {
         if (webhookData && webhookData.merchants) {
