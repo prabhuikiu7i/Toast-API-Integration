@@ -16,37 +16,33 @@ const client = new Client({
 
 client.connect();
 
-const merchantId = 'JH1T8ZPBVPS71';
 app.use(cors());
 app.use(bodyParser.json());
 
 
-app.get('/', async (req, res) => {
-    try {
-        console.log("server is running");
-        res.json({ success: true});
-    } catch (error) {
-        console.error("Error fetching items:", error.message);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-});
-
-
-app.post('/webhook', async (req, res) => {
-    const webhookData = req.body;
+app.post('/', async (req, res) => {
+    const webhookData = await req.body;
     try {
         if (webhookData && webhookData.merchants) {
             for (const merchantId in webhookData.merchants) {
                 const events = webhookData.merchants[merchantId];
 
                 for (const event of events) {
-                    const objectId = event.objectId;
+                    let objectId = event.objectId;
+                    objectId = objectId.split(":")[1];
                     const type = event.type;
+                    const headers = {
+                        'Authorization': 'Bearer acbaa9a9-93cc-fd85-5319-453946e0feb7',
+                        'accept': 'application/json'
+                    };
 
-                    if (type === 'CREATE') {
+                    if (type == 'CREATE') {
 
-                        const itemResponse = await axios.get(`https://apisandbox.dev.clover.com/v3/merchants/${merchantId}/items/${objectId}`);
+                        const itemResponse = await axios.get(`https://apisandbox.dev.clover.com/v3/merchants/${merchantId}/items/${objectId}`, {
+                            headers: headers
+                        });
                         const item = itemResponse.data;
+                        console.log(item, 'jhsagu', itemResponse, 'jkhsdghuisdhaj');
 
                         const insertQuery = {
                             text: 'INSERT INTO CloverTable (id, Item_Name, Price, Price_Type, Taxes_And_Fees, Item_Color, type) VALUES ($1, $2, $3, $4, $5, $6, $7)',
@@ -56,7 +52,9 @@ app.post('/webhook', async (req, res) => {
                         await client.query(insertQuery);
                     } else if (type === 'UPDATE') {
 
-                        const itemResponse = await axios.get(`https://apisandbox.dev.clover.com/v3/merchants/${merchantId}/items/${objectId}`);
+                        const itemResponse = await axios.get(`https://apisandbox.dev.clover.com/v3/merchants/${merchantId}/items/${objectId}`, {
+                            headers: headers
+                        });
                         const item = itemResponse.data;
 
                         const updateQuery = {
@@ -70,7 +68,7 @@ app.post('/webhook', async (req, res) => {
                             text: 'DELETE FROM CloverTable WHERE id = $1',
                             values: [item.id],
                         };
-                        await client.query(deleteQuery);
+                        await client.query(deleteQuery, headers);
                     }
                 }
             }
