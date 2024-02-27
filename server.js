@@ -19,6 +19,11 @@ client.connect();
 app.use(cors());
 app.use(bodyParser.json());
 
+app.get('/test', async (req, res) => {
+    console.log('server is running...');
+    res.json({success:true});
+ });
+
 
 app.post('/webhook', async (req, res) => {
     const webhookData = await req.body;
