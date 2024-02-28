@@ -22,7 +22,10 @@ app.use(bodyParser.json());
 app.post('/webhook', async (req, res) => {
     let body = req.body;
     console.log(body);
-    res.json({ sucess: 'webhook is triggered ok' });
+    res.json({
+        sucess: 'webhook is triggered ok',
+        body
+    });
     const webhookData = req.body;
     try {
         if (webhookData && webhookData.merchants) {
