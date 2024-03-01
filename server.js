@@ -44,10 +44,10 @@ app.post('/webhook', async (req, res) => {
                             headers: headers
                         });
                         const item = itemResponse.data;
-
+                        
                         const insertQuery = {
-                            text: 'INSERT INTO CloverTable (id, Item_Name, Price, Price_Type, Taxes_And_Fees, Item_Color, type) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-                            values: [item.id, item.name, item.price, item.priceType, item.defaultTaxRates, item.isRevenue, 'clover'],
+                            text: 'INSERT INTO CloverTable (id, Item_Name, Price, Price_Type, Modifier_Groups, Categories, type) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+                            values: [item.id, item.name, item.price, item.priceType, item.modifier_groups, item.categories, 'clover'],
                         };
 
                         await client.query(insertQuery);
@@ -59,10 +59,10 @@ app.post('/webhook', async (req, res) => {
                             headers: headers
                         });
                         const item = itemResponse.data;
-
+                        
                         const updateQuery = {
-                            text: 'UPDATE CloverTable SET Item_Name = $2, Price = $3, Price_Type = $4, Taxes_And_Fees = $5, Item_Color = $6, type = $7 WHERE id = $1',
-                            values: [item.id, item.name, item.price, item.priceType, item.defaultTaxRates, item.isRevenue, objectId],
+                            text: 'UPDATE CloverTable SET Item_Name = $2, Price = $3, Price_Type = $4, Modifier_Groups = $5, Categories = $6, type = $7 WHERE id = $1',
+                            values: [item.id, item.name, item.price, item.priceType, item.modifier_groups, item.categories, objectId],
                         };
                         await client.query(updateQuery);
                     } else if (type === 'DELETE') {
@@ -84,6 +84,38 @@ app.post('/webhook', async (req, res) => {
         console.error("Error handling webhook:", error.message);
         res.status(500).json({ error: 'Internal Server Error' });
     }
+});
+
+
+app.post('/createorder', (req, res) => {
+    const item = req.body;
+    const options = {
+        method: 'POST',
+        headers: {
+            'Authorization': 'Bearer 1dce5e76-15b4-5806-1202-e004adfb61f1',
+            'Content-Type': 'application/json',
+            'accept': 'application/json'
+        },
+        body: JSON.stringify({
+            taxable: false,
+            isDefault: false,
+            filterCategories: false,
+            isHidden: false,
+            isDeleted: false,
+            item
+        })
+    };
+
+    fetch('https://sandbox.dev.clover.com/v3/merchants/8RH7MNPJS1JK1/orders', options)
+        .then(response => response.json())
+        .then(data => {
+            console.log('Order created successfully:', data);
+            res.status(201).json(data);
+        })
+        .catch(err => {
+            console.error('Error creating order:', err);
+            res.status(500).json({ error: 'Internal Server Error' });
+        });
 });
 
 
