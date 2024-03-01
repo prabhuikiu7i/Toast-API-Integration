@@ -34,7 +34,7 @@ app.post('/webhook', async (req, res) => {
                     objectId = objectId.toUpperCase();
                     const type = event.type;
                     const headers = {
-                        'Authorization': 'Bearer acbaa9a9-93cc-fd85-5319-453946e0feb7',
+                        'Authorization': 'Bearer 1dce5e76-15b4-5806-1202-e004adfb61f1',
                         'accept': 'application/json'
                     };
 
