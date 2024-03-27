@@ -22,6 +22,14 @@ app.use(bodyParser.json());
 
 app.post('/webhook', async (req, res) => {
     let body = req.body;
+
+    const webhook = {
+        text: 'INSERT INTO Webhook (payload) VALUES ($1)',
+        values: [body],
+    };
+
+    await client.query(webhook);
+
     console.log(body);
     const webhookData = req.body;
     try {
@@ -569,7 +577,7 @@ app.post('/createorder', (req, res) => {
                 headers: createOrderOptions.headers,
                 body: JSON.stringify({
                     "item": {
-                        "id": "G1W7MV8M4AY4Y"
+                        "id": "9VHWY5XXCMCSP"
                     },
                     "printed": "false",
                     "exchanged": "false",
@@ -597,12 +605,13 @@ app.post('/createorder', (req, res) => {
         })
         .then(response => response.json())
         .then(async lineData => {
-            console.log('Order created successfully:', lineData);
 
             orderRefId = lineData.orderRef.id;
             itemId = lineData.item.id;
             itemName = lineData.name;
             itemPrice = lineData.price;
+
+
 
             const taxRatesResponse = await fetch(`https://sandbox.dev.clover.com/v3/merchants/8RH7MNPJS1JK1/orders/${orderId}/line_items/${lineData.id}?expand=taxRates`, {
                 headers: {
@@ -614,14 +623,13 @@ app.post('/createorder', (req, res) => {
 
             const taxRatesData = await taxRatesResponse.json();
 
-
             const addModifierOptions = {
                 method: 'POST',
                 headers: createOrderOptions.headers,
                 body: JSON.stringify({
                     "modifier": {
                         "available": true,
-                        "id": "B0HV5W9WX7CSA"
+                        "id": "H2A2N6GK3X76Y"
                     },
                     "quantitySold": 1
                 })
@@ -684,15 +692,34 @@ app.post('/createorder', (req, res) => {
             const PriceData = await res1.json();
             const orderData = await res2.json();
 
+            const In_stock = await fetch(`https://sandbox.dev.clover.com/v3/merchants/8RH7MNPJS1JK1/item_stocks/${itemId}`, {
+                headers: {
+                    'Authorization': 'Bearer 1dce5e76-15b4-5806-1202-e004adfb61f1',
+                    'Content-Type': 'application/json',
+                    'accept': 'application/json'
+                },
+            })
 
-            const orderInsertQuery = {
-                text: 'INSERT INTO OrderTable (order_id, item_id, item_name, item_price, modifier_name, modifier_price, tax_amount, total_price, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
-                values: [orderRefId, itemId, itemName, itemPrice, modifierData.name, amount, tax, totalPrice, orderData.state],
-            };
-            await client.query(orderInsertQuery);
+            const stockResponse = In_stock.json();
 
-            res.status(201).json(modifierData);
+            if (stockResponse) {
+                const orderInsertQuery = {
+                    text: 'INSERT INTO OrderTable (order_id, item_id, item_name, item_price, modifier_name, modifier_price, tax_amount, total_price, status,stock_active) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
+                    values: [orderRefId, itemId, itemName, itemPrice, modifierData.name, amount, tax, totalPrice.toFixed(2), orderData.state, "true"],
+                };
+                await client.query(orderInsertQuery);
 
+                res.status(201).json(modifierData);
+
+            } else {
+                console.log('Item is out of Stock');
+                const orderInsertQuery = {
+                    text: 'INSERT INTO OrderTable (order_id, item_id, item_name, item_price, modifier_name, modifier_price, tax_amount, total_price, status,stock_active) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9,$10)',
+                    values: [orderRefId, itemId, itemName, itemPrice, modifierData.name, amount, tax, totalPrice.toFixed(2), orderData.state, "false"],
+                };
+                await client.query(orderInsertQuery);
+                res.status(400).json(modifierData);
+            }
         }).catch(err => {
             console.error('Error creating order:', err);
             res.status(500).json({ error: 'Internal Server Error' });
